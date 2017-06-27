@@ -8,6 +8,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.relauncher.Side;
+import org.apache.logging.log4j.LogManager;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -20,9 +21,11 @@ import static com.github.atomicblom.loottableloader.LootTableLoaderMod.MOD_NAME;
 
 @Mod(modid = MOD_ID, name = MOD_NAME)
 public class LootTableLoaderMod {
+
+    private org.apache.logging.log4j.Logger logger = LogManager.getLogger(LootTableLoaderMod.MOD_ID);
+
     public static final String MOD_ID = "loot_table_loader";
     public static final String MOD_NAME = "Loot Table Loader";
-    @Nonnull
     public static File configDir;
     public static final FilenameFilter jsonFilter = (File dir, String name) -> name.toLowerCase().endsWith(".json");
 
@@ -32,7 +35,7 @@ public class LootTableLoaderMod {
 
         configDir = new File(rootConfigDir, "loot_table_loader");
         if (!configDir.exists()) {
-            Logger.info("Loot table config directory does not exist, creating");
+            logger.info("Loot table config directory does not exist, creating");
             configDir.mkdir();
         }
 
@@ -44,7 +47,7 @@ public class LootTableLoaderMod {
             LootTableList.register(new ResourceLocation(MOD_ID, resourceName));
             addedResources++;
         }
-        Logger.info("Added %d additional loot tables", addedResources);
+        logger.info("Added %d additional loot tables", addedResources);
     }
 
     @NetworkCheckHandler
@@ -60,9 +63,9 @@ public class LootTableLoaderMod {
         File lootTableDirectory = new File(new File(worldDirectory, "data"), "loot_tables");
         File ltmDirectory = new File(lootTableDirectory, LootTableLoaderMod.MOD_ID);
         if (!ltmDirectory.exists()) {
-            Logger.info("Creating loot table directory in world for mod");
+            logger.info("Creating loot table directory in world for mod");
             if (!ltmDirectory.mkdirs()) {
-                Logger.severe("Could not create Loot Table Manager world loot directory");
+                logger.error("Could not create Loot Table Manager world loot directory");
             }
         }
 
@@ -73,9 +76,9 @@ public class LootTableLoaderMod {
                 Files.copy(file, new File(ltmDirectory, fileName));
                 copiedLootTables++;
             } catch (IOException e) {
-                Logger.severe("Unable to copy %s to world loot directory", fileName);
+                logger.error("Unable to copy %s to world loot directory", fileName);
             }
         }
-        Logger.info("Copied %d loot tables", copiedLootTables);
+        logger.info("Copied %d loot tables", copiedLootTables);
     }
 }
